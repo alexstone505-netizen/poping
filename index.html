@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>未來職業探索隊：找到我的職業線索！</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Noto Sans TC"', 'sans-serif'] },
+                    colors: {
+                        primary: '#4F46E5', // Indigo 600
+                        secondary: '#10B981', // Emerald 500
+                        accent: '#F59E0B', // Amber 500
+                        bg: '#F3F4F6'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #1e1b4b; background-image: radial-gradient(#312e81 1px, transparent 1px); background-size: 20px 20px; }
+        .slide { display: none; animation: fadeIn 0.5s ease-in-out; }
+        .slide.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .option-card { transition: all 0.2s; cursor: pointer; border: 2px solid transparent; }
+        .option-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .option-card.selected { border-color: #10B981; background-color: #ECFDF5; }
+        .skill-btn { transition: all 0.2s; }
+        .skill-btn.active { background-color: #4F46E5; color: white; transform: scale(1.05); }
+        .job-node { transition: all 0.3s; opacity: 0.5; filter: grayscale(100%); }
+        .job-node.highlighted { opacity: 1; filter: grayscale(0%); transform: scale(1.05); box-shadow: 0 0 15px rgba(79, 70, 229, 0.5); }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 text-gray-800">
+
+    <!-- Main Container -->
+    <div class="bg-white w-full max-w-4xl h-[700px] max-h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden relative">
+        
+        <!-- Header / Progress -->
+        <div class="bg-indigo-600 text-white px-6 py-4 flex justify-between items-center z-10 shrink-0">
+            <div class="flex items-center gap-2">
+                <svg class="w-6 h-6 text-yellow-300" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z"></path></svg>
+                <span class="font-bold text-lg">未來職業探索隊</span>
+            </div>
+            <div class="text-sm font-medium bg-indigo-800 px-3 py-1 rounded-full">
+                任務進度: <span id="progress-text">1/8</span>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="w-full bg-gray-200 h-1 shrink-0">
+            <div id="progress-bar" class="bg-yellow-400 h-1 transition-all duration-500" style="width: 12.5%;"></div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="flex-1 overflow-y-auto p-6 md:p-8 relative w-full">
+            
+            <!-- Slide 1: Start -->
+            <div id="slide-1" class="slide active flex-col items-center justify-center h-full text-center">
+                <div class="w-32 h-32 bg-indigo-100 rounded-full flex items-center justify-center mb-6 shadow-inner">
+                    <span class="text-6xl">🚀</span>
+                </div>
+                <h1 class="text-3xl md:text-4xl font-black text-indigo-900 mb-4">找到我的職業線索！</h1>
+                <p class="text-lg text-gray-600 max-w-lg mb-8 leading-relaxed">
+                    歡迎加入「未來職業探索隊」！<br>
+                    <span class="font-bold text-indigo-600">今天不是要決定你長大一定要做什麼</span>，<br>
+                    而是透過任務，蒐集關於你自己的「興趣與能力線索」。
+                </p>
+                <button onclick="nextSlide()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1">
+                    開始探索 ➔
+                </button>
+            </div>
+
+            <!-- Slide 2: Interest -->
+            <div id="slide-2" class="slide flex-col h-full">
+                <h2 class="text-2xl font-bold text-indigo-900 mb-2">任務一：尋找興趣線索</h2>
+                <p class="text-gray-600 mb-4">請在下方選出 <span class="font-bold text-emerald-600">2項</span> 你平常最喜歡做的事：</p>
+                
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4" id="interest-grid">
+                    <div class="option-card bg-gray-50 p-4 rounded-xl text-center" onclick="toggleInterest(this, '畫畫或設計東西', '創造與表達')">
+                        <div class="text-4xl mb-2">🎨</div>
+                        <div class="font-bold text-gray-800">畫畫或設計東西</div>
+                    </div>
+                    <div class="option-card bg-gray-50 p-4 rounded-xl text-center" onclick="toggleInterest(this, '幫助別人', '與人互動、關懷他人')">
+                        <div class="text-4xl mb-2">🤝</div>
+                        <div class="font-bold text-gray-800">幫助別人</div>
+                    </div>
+                    <div class="option-card bg-gray-50 p-4 rounded-xl text-center" onclick="toggleInterest(this, '操作科技產品', '邏輯與數位科技')">
+                        <div class="text-4xl mb-2">💻</div>
+                        <div class="font-bold text-gray-800">操作科技產品</div>
+                    </div>
+                    <div class="option-card bg-gray-50 p-4 rounded-xl text-center" onclick="toggleInterest(this, '照顧動物或植物', '觀察與自然環境')">
+                        <div class="text-4xl mb-2">🌱</div>
+                        <div class="font-bold text-gray-800">照顧動物或植物</div>
+                    </div>
+                    <div class="option-card bg-gray-50 p-4 rounded-xl text-center" onclick="toggleInterest(this, '運動或戶外活動', '動能與身體操作')">
+                        <div class="text-4xl mb-2">🏃</div>
+                        <div class="font-bold text-gray-800">運動或戶外活動</div>
+                    </div>
+                    <div class="option-card bg-gray-50 p-4 rounded-xl text-center" onclick="toggleInterest(this, '解謎、研究問題', '思考與分析事物')">
+                        <div class="text-4xl mb-2">🔍</div>
+                        <div class="font-bold text-gray-800">解謎、研究問題</div>
+                    </div>
+                </div>
+
+                <div id="interest-feedback" class="hidden bg-emerald-100 border border-emerald-300 text-emerald-800 px-4 py-3 rounded-xl mb-4 flex items-start gap-3">
+                    <span class="text-2xl">💡</span>
+                    <div>
+                        <p class="font-bold">分析完成！</p>
+                        <p id="interest-feedback-text" class="text-sm mt-1"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 3: Guess Career -->
+            <div id="slide-3" class="slide flex-col h-full">
+                <h2 class="text-2xl font-bold text-indigo-900 mb-2">任務二：職業猜猜看</h2>
+                <p class="text-gray-600 mb-4">聽聽這些人的自我介紹，猜猜看他們可能從事什麼職業？</p>
+                
+                <div class="space-y-6 overflow-y-auto pb-4">
+                    <!-- Q1 -->
+                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                        <p class="font-medium text-lg mb-3 text-blue-900">「我的工作需要觀察動物的行為、記錄資料，有時需要到戶外工作，不怕弄髒。」</p>
+                        <div class="flex flex-wrap gap-2" id="q1-opts">
+                            <button onclick="checkQuiz(1, this, false)" class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-100">動物園獸醫</button>
+                            <button onclick="checkQuiz(1, this, true)" class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-100">生態觀察員</button>
+                            <button onclick="checkQuiz(1, this, false)" class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-100">農夫</button>
+                        </div>
+                        <p id="q1-feedback" class="mt-2 text-sm hidden font-bold"></p>
+                    </div>
+
+                    <!-- Q2 -->
+                    <div class="bg-purple-50 p-4 rounded-xl border border-purple-100">
+                        <p class="font-medium text-lg mb-3 text-purple-900">「我會利用電腦軟體，把天馬行空的點子變成遊戲裡的立體場景和角色。」</p>
+                        <div class="flex flex-wrap gap-2" id="q2-opts">
+                            <button onclick="checkQuiz(2, this, true)" class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-100">遊戲美術設計師</button>
+                            <button onclick="checkQuiz(2, this, false)" class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-100">建築師</button>
+                            <button onclick="checkQuiz(2, this, false)" class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-100">電影導演</button>
+                        </div>
+                        <p id="q2-feedback" class="mt-2 text-sm hidden font-bold"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 4: Skill Mapping -->
+            <div id="slide-4" class="slide flex-col h-full">
+                <h2 class="text-2xl font-bold text-indigo-900 mb-2">任務三：能力連連看</h2>
+                <p class="text-gray-600 mb-4">點擊下方不同顏色的「能力按鈕」，看看能應用在哪些職業上！</p>
+                
+                <div class="flex flex-wrap gap-2 mb-6 justify-center">
+                    <button class="skill-btn px-4 py-2 bg-gray-100 border border-gray-300 rounded-full font-medium" onclick="highlightJobs(['job-1', 'job-3', 'job-5'], this)">🗣️ 溝通</button>
+                    <button class="skill-btn px-4 py-2 bg-gray-100 border border-gray-300 rounded-full font-medium" onclick="highlightJobs(['job-2', 'job-4'], this)">💡 創意</button>
+                    <button class="skill-btn px-4 py-2 bg-gray-100 border border-gray-300 rounded-full font-medium" onclick="highlightJobs(['job-3', 'job-4', 'job-5'], this)">🤝 合作</button>
+                    <button class="skill-btn px-4 py-2 bg-gray-100 border border-gray-300 rounded-full font-medium" onclick="highlightJobs(['job-2', 'job-4', 'job-5'], this)">💻 科技運用</button>
+                    <button class="skill-btn px-4 py-2 bg-gray-100 border border-gray-300 rounded-full font-medium" onclick="highlightJobs(['job-1', 'job-2', 'job-5'], this)">🧩 解決問題</button>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-center mt-2 flex-1">
+                    <div id="job-1" class="job-node bg-white p-3 rounded-xl shadow-sm border-2 border-indigo-100 flex flex-col items-center justify-center">
+                        <span class="text-3xl mb-1">🧑‍⚕️</span><span class="font-bold">心理諮商師</span>
+                    </div>
+                    <div id="job-2" class="job-node bg-white p-3 rounded-xl shadow-sm border-2 border-indigo-100 flex flex-col items-center justify-center">
+                        <span class="text-3xl mb-1">🧑‍💻</span><span class="font-bold">軟體工程師</span>
+                    </div>
+                    <div id="job-3" class="job-node bg-white p-3 rounded-xl shadow-sm border-2 border-indigo-100 flex flex-col items-center justify-center">
+                        <span class="text-3xl mb-1">🧑‍🏫</span><span class="font-bold">專案經理</span>
+                    </div>
+                    <div id="job-4" class="job-node bg-white p-3 rounded-xl shadow-sm border-2 border-indigo-100 flex flex-col items-center justify-center">
+                        <span class="text-3xl mb-1">🧑‍🎨</span><span class="font-bold">數位藝術家</span>
+                    </div>
+                    <div id="job-5" class="job-node bg-white p-3 rounded-xl shadow-sm border-2 border-indigo-100 flex flex-col items-center justify-center">
+                        <span class="text-3xl mb-1">👩‍🚀</span><span class="font-bold">太空任務指揮官</span>
+                    </div>
+                </div>
+
+                <div class="bg-yellow-50 text-yellow-800 p-3 rounded-lg text-sm mt-4 font-medium text-center">
+                    🔍 發現了嗎？一種職業通常需要很多種能力，而同一種能力也能用在不同職業喔！
+                </div>
+            </div>
+
+            <!-- Slide 5: My Skills -->
+            <div id="slide-5" class="slide flex-col h-full">
+                <h2 class="text-2xl font-bold text-indigo-900 mb-2">任務四：我的能力雷達</h2>
+                <p class="text-gray-600 mb-4">每個人都有不同的超能力。請點選 <span class="font-bold text-emerald-600">3項</span> 你覺得自己目前「比較有信心」的能力：</p>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6" id="skill-grid">
+                    <div class="option-card bg-gray-50 p-3 rounded-xl text-center border-2" onclick="toggleSkill(this, '溝通表達')"><span class="block text-2xl mb-1">🗣️</span>溝通表達</div>
+                    <div class="option-card bg-gray-50 p-3 rounded-xl text-center border-2" onclick="toggleSkill(this, '創意想像')"><span class="block text-2xl mb-1">💡</span>創意想像</div>
+                    <div class="option-card bg-gray-50 p-3 rounded-xl text-center border-2" onclick="toggleSkill(this, '細心觀察')"><span class="block text-2xl mb-1">👀</span>細心觀察</div>
+                    <div class="option-card bg-gray-50 p-3 rounded-xl text-center border-2" onclick="toggleSkill(this, '團隊合作')"><span class="block text-2xl mb-1">🤝</span>團隊合作</div>
+                    <div class="option-card bg-gray-50 p-3 rounded-xl text-center border-2" onclick="toggleSkill(this, '解決問題')"><span class="block text-2xl mb-1">🧩</span>解決問題</div>
+                    <div class="option-card bg-gray-50 p-3 rounded-xl text-center border-2" onclick="toggleSkill(this, '耐心堅持')"><span class="block text-2xl mb-1">⏳</span>耐心堅持</div>
+                    <div class="option-card bg-gray-50 p-3 rounded-xl text-center border-2" onclick="toggleSkill(this, '科技運用')"><span class="block text-2xl mb-1">💻</span>科技運用</div>
+                </div>
+
+                <div id="skill-feedback" class="hidden bg-indigo-50 border border-indigo-200 text-indigo-800 px-4 py-3 rounded-xl mt-auto">
+                    <p class="font-bold text-center">⭐ 這些是你目前發現的能力線索，這不代表你只能做某一種工作，未來還可以培養更多能力喔！</p>
+                </div>
+            </div>
+
+            <!-- Slide 6: Career Types -->
+            <div id="slide-6" class="slide flex-col h-full">
+                <h2 class="text-2xl font-bold text-indigo-900 mb-2">任務五：職業與我配對</h2>
+                <p class="text-gray-600 mb-4">根據你剛剛選的興趣與能力，你可以進一步探索以下領域。請選擇 <span class="font-bold text-emerald-600">1個</span> 你最想了解的方向：</p>
+                
+                <div class="space-y-3" id="type-grid">
+                    <label class="flex items-center p-4 bg-gray-50 rounded-xl border-2 border-transparent hover:border-emerald-300 cursor-pointer transition-colors has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50">
+                        <input type="radio" name="careerType" value="創作設計型" class="w-5 h-5 text-emerald-600" onchange="selectType()">
+                        <span class="ml-3 font-bold text-lg text-gray-800">🎨 創作設計型</span>
+                        <span class="ml-auto text-sm text-gray-500">喜歡把點子變成作品</span>
+                    </label>
+                    <label class="flex items-center p-4 bg-gray-50 rounded-xl border-2 border-transparent hover:border-emerald-300 cursor-pointer transition-colors has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50">
+                        <input type="radio" name="careerType" value="助人服務型" class="w-5 h-5 text-emerald-600" onchange="selectType()">
+                        <span class="ml-3 font-bold text-lg text-gray-800">🤝 助人服務型</span>
+                        <span class="ml-auto text-sm text-gray-500">喜歡協助或教導別人</span>
+                    </label>
+                    <label class="flex items-center p-4 bg-gray-50 rounded-xl border-2 border-transparent hover:border-emerald-300 cursor-pointer transition-colors has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50">
+                        <input type="radio" name="careerType" value="科技解題型" class="w-5 h-5 text-emerald-600" onchange="selectType()">
+                        <span class="ml-3 font-bold text-lg text-gray-800">💻 科技解題型</span>
+                        <span class="ml-auto text-sm text-gray-500">喜歡用邏輯與工具找答案</span>
+                    </label>
+                    <label class="flex items-center p-4 bg-gray-50 rounded-xl border-2 border-transparent hover:border-emerald-300 cursor-pointer transition-colors has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50">
+                        <input type="radio" name="careerType" value="自然探索型" class="w-5 h-5 text-emerald-600" onchange="selectType()">
+                        <span class="ml-3 font-bold text-lg text-gray-800">🌱 自然探索型</span>
+                        <span class="ml-auto text-sm text-gray-500">對環境與生物充滿好奇</span>
+                    </label>
+                    <label class="flex items-center p-4 bg-gray-50 rounded-xl border-2 border-transparent hover:border-emerald-300 cursor-pointer transition-colors has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50">
+                        <input type="radio" name="careerType" value="溝通領導型" class="w-5 h-5 text-emerald-600" onchange="selectType()">
+                        <span class="ml-3 font-bold text-lg text-gray-800">🗣️ 溝通領導型</span>
+                        <span class="ml-auto text-sm text-gray-500">喜歡帶領團隊達成目標</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Slide 7: Future Card -->
+            <div id="slide-7" class="slide flex-col h-full">
+                <h2 class="text-2xl font-bold text-indigo-900 mb-4">任務六：未來的我</h2>
+                
+                <div id="card-form" class="space-y-4 mb-4">
+                    <p class="text-gray-700 font-medium">請完成這段給自己的話：</p>
+                    <div class="bg-gray-50 p-5 rounded-xl border shadow-sm leading-loose">
+                        我目前對 <span id="fill-type" class="font-bold text-indigo-600 border-b-2 border-indigo-600 px-2">___</span> 類的職業比較有興趣。<br>
+                        因為我喜歡 <span id="fill-interest" class="font-bold text-emerald-600 border-b-2 border-emerald-600 px-2">___</span>。<br>
+                        我覺得自己目前擁有 <span id="fill-skills" class="font-bold text-amber-600 border-b-2 border-amber-600 px-2">___</span> 的能力。<br>
+                        未來，我還想培養 
+                        <select id="future-skill" class="bg-white border border-gray-300 text-gray-900 rounded focus:ring-indigo-500 focus:border-indigo-500 p-1 mx-1 font-bold">
+                            <option value="">請選擇...</option>
+                            <option value="溝通表達">溝通表達</option>
+                            <option value="創意想像">創意想像</option>
+                            <option value="細心觀察">細心觀察</option>
+                            <option value="團隊合作">團隊合作</option>
+                            <option value="解決問題">解決問題</option>
+                            <option value="耐心堅持">耐心堅持</option>
+                            <option value="科技運用">科技運用</option>
+                            <option value="外語能力">外語能力</option>
+                        </select> 
+                        的能力！
+                    </div>
+                    <button onclick="generateCard()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow transition-colors">
+                        ✨ 製作我的未來探索卡 ✨
+                    </button>
+                </div>
+
+                <!-- Generated Card UI -->
+                <div id="final-card" class="hidden flex-col items-center justify-center h-full animate-bounce">
+                    <div class="w-full max-w-sm bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-2xl p-6 text-white relative overflow-hidden">
+                        <div class="absolute top-0 right-0 -mr-8 -mt-8 w-24 h-24 rounded-full bg-white opacity-10"></div>
+                        <h3 class="text-center font-black text-2xl mb-4 tracking-wider">🌟 職業探索卡 🌟</h3>
+                        <div class="bg-white/10 rounded-xl p-4 backdrop-blur-sm space-y-3 text-sm">
+                            <p><strong>🎯 探索方向：</strong><br><span id="card-type" class="text-yellow-300 text-lg"></span></p>
+                            <p><strong>❤️ 興趣特質：</strong><br><span id="card-interest"></span></p>
+                            <p><strong>💪 現有超能力：</strong><br><span id="card-skills"></span></p>
+                            <p><strong>🚀 未來目標：</strong> 培養「<span id="card-future"></span>」能力</p>
+                        </div>
+                        <p class="text-center text-xs mt-4 opacity-80">探索隊員認證標章 ✔️</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 8: Evaluation -->
+            <div id="slide-8" class="slide flex-col h-full">
+                <h2 class="text-2xl font-bold text-indigo-900 mb-2">最終任務：自我檢核</h2>
+                <p class="text-gray-600 mb-4">恭喜你完成探索！請誠實地為自己今天的表現打個勾吧：</p>
+                
+                <div class="space-y-4 flex-1 overflow-y-auto">
+                    <!-- Eval Items -->
+                    <div class="bg-gray-50 p-4 rounded-xl border">
+                        <p class="font-bold mb-3">1. 我能說出至少兩種自己感興趣的職業。</p>
+                        <div class="flex flex-wrap gap-2">
+                            <label class="cursor-pointer px-3 py-1 bg-white border rounded-full has-[:checked]:bg-emerald-500 has-[:checked]:text-white has-[:checked]:border-emerald-500 transition-colors"><input type="radio" name="e1" class="hidden" onchange="checkEval()"> 我做到了 😃</label>
+                            <label class="cursor-pointer px-3 py-1 bg-white border rounded-full has-[:checked]:bg-amber-500 has-[:checked]:text-white has-[:checked]:border-amber-500 transition-colors"><input type="radio" name="e1" class="hidden" onchange="checkEval()"> 我還在練習 🤔</label>
+                            <label class="cursor-pointer px-3 py-1 bg-white border rounded-full has-[:checked]:bg-blue-500 has-[:checked]:text-white has-[:checked]:border-blue-500 transition-colors"><input type="radio" name="e1" class="hidden" onchange="checkEval()"> 我想再多了解 🔍</label>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-xl border">
+                        <p class="font-bold mb-3">2. 我能說出不同職業可能需要的能力。</p>
+                        <div class="flex flex-wrap gap-2">
+                            <label class="cursor-pointer px-3 py-1 bg-white border rounded-full has-[:checked]:bg-emerald-500 has-[:checked]:text-white has-[:checked]:border-emerald-500 transition-colors"><input type="radio" name="e2" class="hidden" onchange="checkEval()"> 我做到了 😃</label>
+                            <label class="cursor-pointer px-3 py-1 bg-white border rounded-full has-[:checked]:bg-amber-500 has-[:checked]:text-white has-[:checked]:border-amber-500 transition-colors"><input type="radio" name="e2" class="hidden" onchange="checkEval()"> 我還在練習 🤔</label>
+                            <label class="cursor-pointer px-3 py-1 bg-white border rounded-full has-[:checked]:bg-blue-500 has-[:checked]:text-white has-[:checked]:border-blue-500 transition-colors"><input type="radio" name="e2" class="hidden" onchange="checkEval()"> 我想再多了解 🔍</label>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-xl border">
+                        <p class="font-bold mb-3">3. 我能找到自己的興趣與能力線索。</p>
+                        <div class="flex flex-wrap gap-2">
+                            <label class="cursor-pointer px-3 py-1 bg-white border rounded-full has-[:checked]:bg-emerald-500 has-[:checked]:text-white has-[:checked]:border-emerald-500 transition-colors"><input type="radio" name="e3" class="hidden" onchange="checkEval()"> 我做到了 😃</label>
+                            <label class="cursor-pointer px-3 py-1 bg-white border rounded-full has-[:checked]:bg-amber-500 has-[:checked]:text-white has-[:checked]:border-amber-500 transition-colors"><input type="radio" name="e3" class="hidden" onchange="checkEval()"> 我還在練習 🤔</label>
+                            <label class="cursor-pointer px-3 py-1 bg-white border rounded-full has-[:checked]:bg-blue-500 has-[:checked]:text-white has-[:checked]:border-blue-500 transition-colors"><input type="radio" name="e3" class="hidden" onchange="checkEval()"> 我想再多了解 🔍</label>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-xl border">
+                        <p class="font-bold mb-3">4. 我能提出一個自己未來想繼續探索的職業方向。</p>
+                        <div class="flex flex-wrap gap-2">
+                            <label class="cursor-pointer px-3 py-1 bg-white border rounded-full has-[:checked]:bg-emerald-500 has-[:checked]:text-white has-[:checked]:border-emerald-500 transition-colors"><input type="radio" name="e4" class="hidden" onchange="checkEval()"> 我做到了 😃</label>
+                            <label class="cursor-pointer px-3 py-1 bg-white border rounded-full has-[:checked]:bg-amber-500 has-[:checked]:text-white has-[:checked]:border-amber-500 transition-colors"><input type="radio" name="e4" class="hidden" onchange="checkEval()"> 我還在練習 🤔</label>
+                            <label class="cursor-pointer px-3 py-1 bg-white border rounded-full has-[:checked]:bg-blue-500 has-[:checked]:text-white has-[:checked]:border-blue-500 transition-colors"><input type="radio" name="e4" class="hidden" onchange="checkEval()"> 我想再多了解 🔍</label>
+                        </div>
+                    </div>
+                </div> <!-- 修復：補上原本遺漏的關閉標籤 -->
+                
+                <div id="finish-msg" class="hidden bg-indigo-600 text-white text-center py-4 rounded-xl mt-4 font-bold text-lg shadow-lg flex-col items-center justify-center gap-3">
+                    <p>🎉 恭喜你完成了所有任務！探索隊員，未來的路無限寬廣！</p>
+                    <button id="submit-btn" onclick="submitDataToSheet()" class="mt-2 bg-yellow-400 hover:bg-yellow-500 text-indigo-900 px-6 py-2 rounded-full shadow transition-all transform hover:scale-105">
+                        上傳我的探索紀錄 📤
+                    </button>
+                    <p id="submit-status" class="hidden text-sm mt-1 text-indigo-200"></p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer / Navigation (加上 id="nav-bar" 以便控制顯示) -->
+        <div id="nav-bar" class="bg-gray-50 border-t border-gray-200 p-4 flex justify-between shrink-0">
+            <button id="btn-prev" onclick="prevSlide()" class="px-6 py-2 rounded-lg font-bold text-gray-600 hover:bg-gray-200 transition-colors invisible">
+                ⬅️ 上一步
+            </button>
+            <button id="btn-next" onclick="nextSlide()" class="px-6 py-2 rounded-lg font-bold bg-indigo-600 hover:bg-indigo-700 text-white transition-colors opacity-50 cursor-not-allowed pointer-events-none">
+                下一步 ➡️
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 8;
+        
+        // User Data State
+        const userData = {
+            interests: [], // [{name, feedbackType}]
+            skills: [], // strings
+            careerType: '',
+            q1Solved: false,
+            q2Solved: false,
+            evalCount: 0,
+            futureSkill: '', // 紀錄未來想培養的能力
+            cardGenerated: false // 確保有製作探索卡
+        };
+
+        function updateUI() {
+            // Update Slides visibility
+            document.querySelectorAll('.slide').forEach((el, index) => {
+                if(index + 1 === currentSlide) {
+                    el.classList.add('active');
+                } else {
+                    el.classList.remove('active');
+                }
+            });
+
+            // Update Progress Bar
+            document.getElementById('progress-text').innerText = `${currentSlide}/${totalSlides}`;
+            document.getElementById('progress-bar').style.width = `${(currentSlide / totalSlides) * 100}%`;
+
+            // Update Nav Buttons
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+            const navBar = document.getElementById('nav-bar');
+
+            // 第一頁隱藏底部導航列，讓學生專注點擊中間的「開始探索」
+            if (currentSlide === 1) {
+                navBar.classList.add('hidden');
+                navBar.classList.remove('flex');
+            } else {
+                navBar.classList.remove('hidden');
+                navBar.classList.add('flex');
+            }
+
+            btnPrev.classList.toggle('invisible', currentSlide === 1);
+            
+            // Validation for Next Button (加入動態文字提示)
+            let canProceed = true;
+            let nextBtnText = '下一步 ➡️';
+
+            if (currentSlide === 1) canProceed = true;
+            if (currentSlide === 2 && userData.interests.length < 2) {
+                canProceed = false;
+                nextBtnText = '請選擇2項興趣 🔒';
+            }
+            if (currentSlide === 3 && (!userData.q1Solved || !userData.q2Solved)) {
+                canProceed = false;
+                nextBtnText = '請答對2道題目 🔒';
+            }
+            if (currentSlide === 4) canProceed = true; 
+            if (currentSlide === 5 && userData.skills.length < 3) {
+                canProceed = false;
+                nextBtnText = '請選擇3項能力 🔒';
+            }
+            if (currentSlide === 6 && !userData.careerType) {
+                canProceed = false;
+                nextBtnText = '請選擇1個方向 🔒';
+            }
+            if (currentSlide === 7 && !userData.cardGenerated) {
+                canProceed = false;
+                nextBtnText = '請先製作探索卡 🔒';
+            }
+
+            if (currentSlide === 8) {
+                btnNext.classList.add('hidden'); // No next on last slide
+            } else {
+                btnNext.classList.remove('hidden');
+            }
+
+            btnNext.innerText = nextBtnText;
+
+            // 根據是否解鎖變更按鈕顏色
+            if (canProceed) {
+                btnNext.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none', 'bg-gray-400');
+                btnNext.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+            } else {
+                btnNext.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none', 'bg-gray-400');
+                btnNext.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+            }
+
+            // Prep data for Slide 7
+            if (currentSlide === 7) {
+                document.getElementById('fill-type').innerText = userData.careerType || '___';
+                document.getElementById('fill-interest').innerText = userData.interests.map(i => i.name).join('與') || '___';
+                document.getElementById('fill-skills').innerText = userData.skills.join('、') || '___';
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updateUI();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateUI();
+            }
+        }
+
+        // Slide 2 logic
+        function toggleInterest(element, name, type) {
+            const index = userData.interests.findIndex(i => i.name === name);
+            if (index > -1) {
+                userData.interests.splice(index, 1);
+                element.classList.remove('selected');
+            } else {
+                if (userData.interests.length >= 2) return; // Max 2
+                userData.interests.push({name, type});
+                element.classList.add('selected');
+            }
+
+            const feedback = document.getElementById('interest-feedback');
+            const feedbackText = document.getElementById('interest-feedback-text');
+            
+            if (userData.interests.length === 2) {
+                const types = userData.interests.map(i => i.type).join('」與「');
+                feedbackText.innerText = `這可能代表你喜歡「${types}」！請點擊右下角【下一步】。`;
+                feedback.classList.remove('hidden');
+            } else {
+                feedback.classList.add('hidden');
+            }
+            updateUI();
+        }
+
+        // Slide 3 logic
+        function checkQuiz(qNum, btn, isCorrect) {
+            const containerId = `q${qNum}-opts`;
+            const feedbackId = `q${qNum}-feedback`;
+            const feedback = document.getElementById(feedbackId);
+            
+            // Reset buttons styling in this group
+            document.querySelectorAll(`#${containerId} button`).forEach(b => {
+                b.classList.remove('bg-emerald-500', 'text-white', 'bg-red-500', 'border-transparent');
+                b.classList.add('bg-white');
+            });
+
+            if (isCorrect) {
+                btn.classList.replace('bg-white', 'bg-emerald-500');
+                btn.classList.add('text-white', 'border-transparent');
+                feedback.innerText = "✅ 答對了！你抓到線索了！";
+                feedback.className = "mt-2 text-sm text-emerald-600 font-bold block";
+                if(qNum === 1) userData.q1Solved = true;
+                if(qNum === 2) userData.q2Solved = true;
+            } else {
+                btn.classList.replace('bg-white', 'bg-red-500');
+                btn.classList.add('text-white', 'border-transparent');
+                feedback.innerText = "🤔 再想想看，還有其他可能喔！";
+                feedback.className = "mt-2 text-sm text-red-500 font-bold block";
+                if(qNum === 1) userData.q1Solved = false;
+                if(qNum === 2) userData.q2Solved = false;
+            }
+            updateUI();
+        }
+
+        // Slide 4 logic
+        function highlightJobs(jobIds, btn) {
+            // Reset buttons
+            document.querySelectorAll('.skill-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // Reset jobs
+            document.querySelectorAll('.job-node').forEach(j => j.classList.remove('highlighted'));
+
+            // Highlight target
+            jobIds.forEach(id => {
+                document.getElementById(id).classList.add('highlighted');
+            });
+        }
+
+        // Slide 5 logic
+        function toggleSkill(element, name) {
+            const index = userData.skills.indexOf(name);
+            if (index > -1) {
+                userData.skills.splice(index, 1);
+                element.classList.remove('selected', 'border-emerald-500', 'bg-emerald-50');
+            } else {
+                if (userData.skills.length >= 3) return; // Max 3
+                userData.skills.push(name);
+                element.classList.add('selected', 'border-emerald-500', 'bg-emerald-50');
+            }
+
+            const feedback = document.getElementById('skill-feedback');
+            if (userData.skills.length === 3) {
+                feedback.classList.remove('hidden');
+            } else {
+                feedback.classList.add('hidden');
+            }
+            updateUI();
+        }
+
+        // Slide 6 logic
+        function selectType() {
+            const selected = document.querySelector('input[name="careerType"]:checked');
+            if (selected) {
+                userData.careerType = selected.value;
+            }
+            updateUI();
+        }
+
+        // Slide 7 logic
+        function generateCard() {
+            const futureSkill = document.getElementById('future-skill').value;
+            if(!futureSkill) {
+                // Not using alert per rules, visual prompt instead
+                document.getElementById('future-skill').classList.add('ring-2', 'ring-red-500');
+                setTimeout(() => document.getElementById('future-skill').classList.remove('ring-2', 'ring-red-500'), 1000);
+                return;
+            }
+            
+            userData.futureSkill = futureSkill; // 儲存到變數以便傳送
+            
+            document.getElementById('card-type').innerText = userData.careerType;
+            document.getElementById('card-interest').innerText = userData.interests.map(i=>i.name).join('、');
+            document.getElementById('card-skills').innerText = userData.skills.join('、');
+            document.getElementById('card-future').innerText = futureSkill;
+
+            document.getElementById('card-form').classList.add('hidden');
+            
+            const finalCard = document.getElementById('final-card');
+            finalCard.classList.remove('hidden');
+            finalCard.classList.add('flex');
+            
+            // Allow next to eval
+            userData.cardGenerated = true;
+            updateUI();
+        }
+
+        // Slide 8 logic
+        function checkEval() {
+            const checkedRadios = document.querySelectorAll('#slide-8 input[type="radio"]:checked');
+            if (checkedRadios.length === 4) {
+                document.getElementById('finish-msg').classList.remove('hidden');
+                document.getElementById('finish-msg').classList.add('flex');
+            }
+        }
+
+        // 送出資料到 Google Sheets
+        function submitDataToSheet() {
+            // 請將這裡替換成您的 Google Apps Script 網頁應用程式網址
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbx3XQribAr2-MPLPbMz4Lfjowd_GL9XFBMgh9QWbwrJNePbsM4fAn8Y6rsQUzm1G5vC/exec';
+            
+            if (scriptURL === 'YOUR_WEB_APP_URL_HERE') {
+                document.getElementById('submit-status').innerText = '⚠️ 老師尚未設定後端網址，但你的卡片已經完成囉！';
+                document.getElementById('submit-status').classList.remove('hidden');
+                return;
+            }
+
+            const btn = document.getElementById('submit-btn');
+            const statusText = document.getElementById('submit-status');
+            
+            btn.innerText = '傳送中...';
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            statusText.classList.add('hidden');
+
+            // 整理要傳送的資料
+            const payload = {
+                interests: userData.interests.map(i => i.name).join('、'),
+                skills: userData.skills.join('、'),
+                careerType: userData.careerType,
+                futureSkill: userData.futureSkill,
+                evalStatus: '全數完成'
+            };
+
+            // 使用 fetch 傳送 POST 請求
+            // 刻意不設定 Content-Type: application/json 以避免 CORS 預檢請求錯誤
+            fetch(scriptURL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    btn.innerText = '✅ 紀錄已成功上傳！';
+                    btn.classList.remove('bg-yellow-400', 'hover:bg-yellow-500');
+                    btn.classList.add('bg-emerald-500', 'text-white');
+                } else {
+                    throw new Error('伺服器回傳錯誤');
+                }
+            })
+            .catch(error => {
+                btn.innerText = '❌ 傳送失敗，請重試';
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                statusText.innerText = '請檢查網路連線或稍後再試。';
+                statusText.classList.remove('hidden');
+                console.error('Error!', error.message);
+            });
+        }
+
+        // Initialize
+        updateUI();
+
+    </script>
+</body>
+</html>
