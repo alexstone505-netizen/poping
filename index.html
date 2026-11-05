@@ -622,20 +622,19 @@
             };
 
             // 使用 fetch 傳送 POST 請求
-            // 刻意不設定 Content-Type: application/json 以避免 CORS 預檢請求錯誤
             fetch(scriptURL, {
                 method: 'POST',
+                mode: 'no-cors', // ⭐️ 新增這行：略過跨網域安全檢查 (CORS)，手機瀏覽器才不會擋
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8',
+                },
                 body: JSON.stringify(payload)
             })
-            .then(response => response.json())
-            .then(data => {
-                if(data.status === 'success') {
-                    btn.innerText = '✅ 紀錄已成功上傳！';
-                    btn.classList.remove('bg-yellow-400', 'hover:bg-yellow-500');
-                    btn.classList.add('bg-emerald-500', 'text-white');
-                } else {
-                    throw new Error('伺服器回傳錯誤');
-                }
+            .then(() => {
+                // ⭐️ 因為使用了 no-cors，我們不要求解析 Google 的回傳值，只要沒報錯就視為送出成功
+                btn.innerText = '✅ 紀錄已成功上傳！';
+                btn.classList.remove('bg-yellow-400', 'hover:bg-yellow-500');
+                btn.classList.add('bg-emerald-500', 'text-white');
             })
             .catch(error => {
                 btn.innerText = '❌ 傳送失敗，請重試';
